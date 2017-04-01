@@ -70,6 +70,10 @@ end
 
 module Crikey
   # TODO Put your code here
+  macro embed(filename, io_name)
+    io_name << {{ run("./crikey/embedder.cr", filename) }}
+    io_name
+  end
 
   # puts [:div, "hello"].to_html
   # puts [:ul, [:li, 1], [:li, 2]].to_html
