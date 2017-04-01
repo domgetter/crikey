@@ -1,6 +1,6 @@
 # crikey
 
-TODO: Write a description here
+Crikey is a templating engine inspired by [Hiccup](https://github.com/weavejester/hiccup).  It is focused on mapping snippets of view code and logic to data structures available in the language.
 
 ## Installation
 
@@ -9,24 +9,21 @@ Add this to your application's `shard.yml`:
 ```yaml
 dependencies:
   crikey:
-    github: [your-github-name]/crikey
+    github: domgetter/crikey
 ```
 
 ## Usage
 
 ```crystal
 require "crikey"
+
+[:div, [:span, "Hello"]].to_html
+#=> "<div><span>Hello</span></div>"
 ```
-
-TODO: Write usage instructions here
-
-## Development
-
-TODO: Write development instructions here
 
 ## Contributing
 
-1. Fork it ( https://github.com/[your-github-name]/crikey/fork )
+1. Fork it ( https://github.com/domgetter/crikey/fork )
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)
@@ -34,4 +31,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [[your-github-name]](https://github.com/[your-github-name]) Dominic Muller - creator, maintainer
+- [domgetter](https://github.com/domgetter) Dominic Muller - creator, maintainer
