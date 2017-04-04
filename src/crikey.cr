@@ -3,7 +3,7 @@ require "./crikey/*"
 module Crikey
   def self.array_to_html(data)
     return "" if data.empty?
-    if self[1]? && self[1].is_a? NamedTuple
+    if data[1]? && data[1].is_a? NamedTuple
       self.tag_with_attrs(data)
     else
       self.tag_without_attrs(data)
@@ -26,7 +26,7 @@ module Crikey
   end
 
   def self.to_html(data)
-    case data.class
+    case data
     when Array
       self.array_to_html(data)
     when String
@@ -48,7 +48,7 @@ module Crikey
         data[1..-1].each {|t| str << Crikey.to_html(t) }
         str << "</" << data.first.to_s << ">"
       when Array
-        self.each {|t| str << Crikey.to_html(t) }
+        data.each {|t| str << Crikey.to_html(t) }
       end
     end
   end
@@ -58,10 +58,10 @@ module Crikey
       case data.first
       when Symbol
         str << "<" << data.first.to_s << Crikey.to_html(data[1]) << ">"
-        self[2..-1].each {|t| str << Crikey.to_html(t) }
-        str << "</" << self.first.to_s << ">"
+        data[2..-1].each {|t| str << Crikey.to_html(t) }
+        str << "</" << data.first.to_s << ">"
       when Array
-        self.each {|t| str << Crikey.to_html(t) }
+        data.each {|t| str << Crikey.to_html(t) }
       end
     end
   end
