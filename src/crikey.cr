@@ -1,92 +1,73 @@
 require "./crikey/*"
 
-class Array
-  def tag_without_attrs
-    String.build do |str|
-      case self.first
-      when Symbol
-        str << "<" << self.first.to_s << ">"
-        self[1..-1].each {|t| str << t.to_html }
-        str << "</" << self.first.to_s << ">"
-      when Array
-        self.each {|t| str << t.to_html }
-      end
-    end
-  end
-
-  def tag_with_attrs
-    String.build do |str|
-      case self.first
-      when Symbol
-        str << "<" << self.first.to_s << self[1].to_html << ">"
-        self[2..-1].each {|t| str << t.to_html }
-        str << "</" << self.first.to_s << ">"
-      when Array
-        self.each {|t| str << t.to_html }
-      end
-    end
-  end
-
-  def to_html
-    return "" if self.empty?
-    if self[1].is_a? NamedTuple
-      self.tag_with_attrs
+module Crikey
+  def self.array_to_html(data)
+    return "" if data.empty?
+    if self[1]? && self[1].is_a? NamedTuple
+      self.tag_with_attrs(data)
     else
-      self.tag_without_attrs
+      self.tag_without_attrs(data)
     end
   end
-end
 
-class String
-  def to_html
-    self
-  end
-end
-
-struct Symbol
-  def to_html
-    self.to_s
-  end
-end
-
-struct NamedTuple
-  def to_html
+  def self.named_tuple_to_html(data)
     # converts key value pairs to html attributes
     # e.g. {id: "main", class: "blue"} => "id=\"main\" class=\"blue\""
     String.build do |str|
-      self.keys.each do |key|
+      data.keys.each do |key|
         str << " " << key.to_s << "="
-        str << "\"" << self[key].to_html << "\""
+        str << "\"" << Crikey.to_attr(data[key]) << "\""
       end
     end
   end
-end
 
-struct Int
-  def to_html
-    self.to_s
+  def self.to_attr(data)
+    data.to_s
   end
-end
 
-module Crikey
-  # TODO Put your code here
+  def self.to_html(data)
+    case data.class
+    when Array
+      self.array_to_html(data)
+    when String
+      data
+    when Symbol
+      data.to_s
+    when NamedTuple
+      self.named_tuple_to_html(data)
+    when Int
+      data.to_s
+    end
+  end
+
+  def self.tag_without_attrs(data)
+    String.build do |str|
+      case data.first
+      when Symbol
+        str << "<" << data.first.to_s << ">"
+        data[1..-1].each {|t| str << Crikey.to_html(t) }
+        str << "</" << data.first.to_s << ">"
+      when Array
+        self.each {|t| str << Crikey.to_html(t) }
+      end
+    end
+  end
+
+  def self.tag_with_attrs(data)
+    String.build do |str|
+      case data.first
+      when Symbol
+        str << "<" << data.first.to_s << Crikey.to_html(data[1]) << ">"
+        self[2..-1].each {|t| str << Crikey.to_html(t) }
+        str << "</" << self.first.to_s << ">"
+      when Array
+        self.each {|t| str << Crikey.to_html(t) }
+      end
+    end
+  end
+
   macro embed(filename, io_name)
-    io_name << {{ run("./crikey/embedder.cr", filename) }}
-    io_name
+    {{io_name.id}} << {{ run("./embed/embedder.cr", filename) }}
+    {{io_name.id}}
   end
-
-  # puts [:div, "hello"].to_html
-  # puts [:ul, [:li, 1], [:li, 2]].to_html
-  # puts [:div, {id: "main"}, "main div"].to_html
-  # puts [:div, {id: "main", class: "blue"}, [:div, "some content"], [:div, "footer"]].to_html
-  # puts [:div, ["hi", "you"]]
-  # tweets = [{username: "PDawg19", content: "awesome. \#lazysunday"}, {username: "SaraJane", content: "That was awful"}]
-  # tweet_div = -> (tweet : NamedTuple(username: String, content: String)) {
-  #   [:div, {class: "tweet"},
-  #    [:h1, tweet[:username]],
-  #    [:span, tweet[:content]]]
-  # }
-  # puts [:div, tweets.map(&tweet_div)]
-  # puts [:div, tweets.map(&tweet_div)].to_html
-  # puts ([:div] + tweets.map(&tweet_div)).to_html
 end
