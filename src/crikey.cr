@@ -1,6 +1,8 @@
 require "./crikey/*"
 
 module Crikey
+	AUTO_CLOSING_TAGS = [:area, :base, :br, :col, :command, :embed, :hr, :img, :input, :keygen, :link, :menuitem, :meta, :param, :source, :track, :wbr]
+
   def self.array_to_html(data)
     return "" if data.empty?
     if data[1]? && data[1].is_a? NamedTuple
@@ -43,12 +45,18 @@ module Crikey
   def self.tag_without_attrs(data)
     String.build do |str|
       case data.first
-      when Symbol
-        str << "<" << data.first.to_s << ">"
-        data[1..-1].each {|t| str << Crikey.to_html(t) }
-        str << "</" << data.first.to_s << ">"
+			when Symbol
+				if Crikey::AUTO_CLOSING_TAGS.includes? data.first
+					str << "<" << data.first.to_s << " />"
+				else
+					str << "<" << data.first.to_s << ">"
+					data[1..-1].each {|t| str << Crikey.to_html(t) }
+					str << "</" << data.first.to_s << ">"
+				end
       when Array
-        data.each {|t| str << Crikey.to_html(t) }
+				data.each {|t| str << Crikey.to_html(t) }
+			when String
+				str << data.first
       end
     end
   end
@@ -56,13 +64,19 @@ module Crikey
   def self.tag_with_attrs(data)
     String.build do |str|
       case data.first
-      when Symbol
-        str << "<" << data.first.to_s << Crikey.to_html(data[1]) << ">"
-        data[2..-1].each {|t| str << Crikey.to_html(t) }
-        str << "</" << data.first.to_s << ">"
+			when Symbol
+				if Crikey::AUTO_CLOSING_TAGS.includes? data.first
+					str << "<" << data.first.to_s << Crikey.to_html(data[1]) << " />"
+				else
+					str << "<" << data.first.to_s << Crikey.to_html(data[1]) << ">"
+					data[2..-1].each {|t| str << Crikey.to_html(t) }
+					str << "</" << data.first.to_s << ">"
+				end
       when Array
-        data.each {|t| str << Crikey.to_html(t) }
-      end
+				data.each {|t| str << Crikey.to_html(t) }
+			when String
+				str << data.first
+			end
     end
   end
 
